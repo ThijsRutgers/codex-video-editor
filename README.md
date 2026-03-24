@@ -1,6 +1,6 @@
-# 🎬 Video Editor Studio
+# Codex Video Editor
 
-Autonomous AI video editor. Drop in a video, type one prompt, get an edited video back.
+Your video editor quit. This one doesn't sleep, doesn't charge by the hour, and ships a cut while you're still writing the brief.
 
 ## Quick Start
 
