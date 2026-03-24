@@ -1,0 +1,100 @@
+{
+  "branchName": "video-edit",
+  "userStories": [
+    {
+      "id": "VE-001",
+      "title": "Video analysis and transcription",
+      "description": "Analyze public/video.mp4 with ffprobe, transcribe with Whisper, generate data/storyboard.json based on transcript analysis. Identify sections, speaker changes, and key topics.",
+      "acceptanceCriteria": [
+        "data/transcript.json exists with word-level timestamps",
+        "data/storyboard.json exists with sections array",
+        "Each section has startTime, endTime, type, and overlays",
+        "storyboard.json speakers array is populated"
+      ],
+      "passes": false
+    },
+    {
+      "id": "VE-002",
+      "title": "Base composition with source video",
+      "description": "Update MainComposition.tsx to use OffthreadVideo playing public/video.mp4 full-frame. Set composition duration to match video duration. Use calculateMetadata for dynamic duration.",
+      "acceptanceCriteria": [
+        "Composition compiles without TypeScript errors",
+        "Review frame at second 1 shows the source video correctly",
+        "Composition duration matches source video duration"
+      ],
+      "passes": false
+    },
+    {
+      "id": "VE-003",
+      "title": "Opening title overlay",
+      "description": "Add OpeningTitle component as a Sequence in the first 3-4 seconds. Title text comes from storyboard.json edits.openingTitle or user prompt.",
+      "acceptanceCriteria": [
+        "Title visible in review frame at second 2",
+        "Text within safe zone (60px from edges)",
+        "Font and color match CODEX.md style guide",
+        "Spring animation renders correctly at midpoint frame"
+      ],
+      "passes": false
+    },
+    {
+      "id": "VE-004",
+      "title": "Speaker name cards",
+      "description": "Add NameCard components for each speaker at their first appearance time (from storyboard.json). Each card visible for 4 seconds with slide-in and fade-out.",
+      "acceptanceCriteria": [
+        "Each speaker has a name card at the correct timestamp",
+        "Review frames show correct name and role text",
+        "Cards do not overlap with faces or other overlays",
+        "Enter and exit animations both work"
+      ],
+      "passes": false
+    },
+    {
+      "id": "VE-005",
+      "title": "Section transition titles",
+      "description": "Add SectionTitle components at each section boundary from storyboard.json. Each visible for 3 seconds.",
+      "acceptanceCriteria": [
+        "Each section transition has a title overlay",
+        "Titles match section names from storyboard",
+        "Timing aligns with transcript content shifts",
+        "No overlap with name cards"
+      ],
+      "passes": false
+    },
+    {
+      "id": "VE-006",
+      "title": "TikTok-style captions",
+      "description": "Add AnimatedCaptions component using words from data/transcript.json. Captions cover the full video duration with word-by-word highlighting.",
+      "acceptanceCriteria": [
+        "Captions sync with audio (spot-check 3 random moments)",
+        "No overlap with name cards or section titles",
+        "Font size 42px minimum, readable on dark and light backgrounds",
+        "Active word highlighted in accent color"
+      ],
+      "passes": false
+    },
+    {
+      "id": "VE-007",
+      "title": "Outro with logo",
+      "description": "Add LogoOutro component in the last 4-5 seconds. Include logo if public/assets/logo.png exists, and website URL if provided.",
+      "acceptanceCriteria": [
+        "Logo visible and centered in review frame",
+        "URL text readable below logo",
+        "Smooth fade to black at the very end",
+        "No abrupt cut - transition feels natural"
+      ],
+      "passes": false
+    },
+    {
+      "id": "VE-008",
+      "title": "Full review and final render",
+      "description": "Render review frames at 0%, 25%, 50%, 75%, 100% of video. Check all quality criteria. Fix any remaining issues. Render final MP4 to out/final.mp4.",
+      "acceptanceCriteria": [
+        "All 5 review frames pass quality checklist",
+        "out/final.mp4 exists and file size > 0",
+        "No TypeScript compilation errors",
+        "Completion report printed to terminal"
+      ],
+      "passes": false
+    }
+  ]
+}

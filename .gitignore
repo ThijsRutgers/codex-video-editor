@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+
+# Build output
+out/
+
+# Project-specific generated files
+data/storyboard.json
+data/transcript.json
+
+# Media input files
+public/audio.wav
+public/audio-20.wav
+public/video.mp4
+
+# Generated review frames
+review-frames/**/*.png
+review-frames/ordered/
+
+# whisper.cpp binary/build (install separately via setup.sh)
+whisper.cpp/
+
+# macOS
+.DS_Store
+
+# Claude memory
+.claude/

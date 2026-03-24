@@ -1,0 +1,30 @@
+{
+  "name": "video-editor-studio",
+  "version": "1.0.0",
+  "description": "Autonomous AI video editor powered by Codex + Remotion",
+  "scripts": {
+    "dev": "npx remotion studio",
+    "build": "npx remotion render MainComposition out/final.mp4 --crf=18",
+    "render": "npx remotion render MainComposition out/final.mp4 --crf=18",
+    "render:preview": "npx remotion render MainComposition out/preview.mp4 --crf=28 --scale=0.5",
+    "transcribe": "npx tsx scripts/transcribe.ts",
+    "review-frame": "npx remotion still MainComposition --output=review-frames/check.png"
+  },
+  "dependencies": {
+    "@remotion/captions": "4.0.435",
+    "@remotion/cli": "4.0.435",
+    "@remotion/google-fonts": "^4.0.435",
+    "@remotion/install-whisper-cpp": "4.0.435",
+    "@remotion/webcodecs": "4.0.435",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "remotion": "4.0.435",
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.0",
+    "prettier": "^3.3.0",
+    "tailwindcss": "^3.4.0"
+  }
+}
