@@ -2,6 +2,8 @@
 
 Your video editor quit. This one doesn't sleep, doesn't charge by the hour, and ships a cut while you're still writing the brief.
 
+Built for faceless documentary and YouTube explainer content — the Kurzgesagt, ColdFusion, Johnny Harris type. You bring a finished montage with voiceover. Codex adds everything on top: chapter titles, year stamps, location labels, key fact callouts, animated captions, and an outro. No re-cutting. Just the dressing.
+
 ## Quick Start
 
 ```bash
