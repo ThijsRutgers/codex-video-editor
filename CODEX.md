@@ -18,6 +18,22 @@ key facts, captions, transitions, and visual emphasis elements.
 
 Always use the Remotion best practices skill.
 
+## Chat Shortcut (New Project Trigger)
+
+If the user message contains a local video path and asks to start a new project,
+run the full preparation and edit flow automatically (review-first, no auto-render).
+
+Preferred chat trigger examples:
+- `start new project with /absolute/path/video.mp4`
+- `nieuw project met: /absolute/path/video.mp4`
+- `edit this documentary: /absolute/path/video.mp4`
+
+Execution rule:
+1. Copy source to `public/video.mp4`
+2. Run `npm run prepare:review`
+3. Report review URL and outputs
+4. Render only on explicit user request
+
 ---
 
 ## What You Add (Overlay Types)
@@ -51,8 +67,10 @@ show it as a styled quote with attribution.
 Example: "We choose to go to the Moon." — John F. Kennedy, 1962
 
 ### 6. Name/Person Labels
-When a person is mentioned for the first time, show a subtle label.
-Not a corporate name card — more like a documentary footnote.
+When a person is mentioned for the first time, show a large portrait fly-in
+plus a documentary-style name card. Portrait should be dominant on the left
+side (roughly 35-50% of frame width when available), with background removed
+if a cutout exists.
 Example: "Robert Oppenheimer — Theoretical Physicist"
 
 ### 7. Captions / Subtitles
@@ -89,7 +107,10 @@ Clean ending, no clutter.
    - People (first mention): "Dr. Sarah Chen", "a man named..." → Person Label
    - Topic shifts: long pauses, "but then...", "meanwhile" → Chapter Title
 5. **Don't overdo it.** Not every sentence needs an overlay.
-   Rule of thumb: one overlay element every 10-20 seconds max.
+   Rule of thumb by length:
+   - 0-5 min: 1 text moment every ~25-45 sec
+   - 5-10 min: 1 text moment every ~35-60 sec
+   - 15-20 min: 1 text moment every ~45-90 sec
    Let the video breathe. Empty frames are fine.
 6. **Create the storyboard** with all decisions mapped to timestamps
 
@@ -147,6 +168,8 @@ premium YouTube. Not corporate. Not playful. Atmospheric and serious.
 - Quote cards: centered, y=30%, max-width 70%, italic
 - Person labels: bottom-left, x=80px, y=bottom-100px 
   (same zone as location — never overlap, they alternate)
+- Person portrait fly-ins: left side, large, often from floor to upper-mid frame
+  with the text card offset to the right of the portrait for readability
 - Captions: centered, bottom 15%, max-width 80%
 - Opening title: centered, y=38%
 
@@ -167,6 +190,8 @@ premium YouTube. Not corporate. Not playful. Atmospheric and serious.
   (excluding captions which are continuous)
 - Year stamps can be slightly "harder" — they can appear instantly
   and fade out, mimicking documentary style
+- Person portraits should never look like small corner stickers.
+  They must read as a major visual element.
 
 ---
 
@@ -294,8 +319,14 @@ FOR EACH OVERLAY in the storyboard:
    - Are location labels timed to when the place is first mentioned?
 4. Fix remaining issues (max 3 iterations)
 
-### STEP 8: Final Render + Report
-1. `npx remotion render MainComposition out/final.mp4 --crf=18`
+### STEP 8: Review Handoff (Default)
+1. Prepare overlays/components/storyboard and stop before final render.
+2. Render review frames and instruct reviewer to open Remotion Studio:
+   `npm run dev`
+3. Share what changed and wait for approval.
+
+### STEP 9: Final Render + Report (Only After Approval)
+1. `npm run render -- --yes`
 2. Print report:
 ```
 ✅ DOCUMENTARY EDIT COMPLETE
@@ -438,6 +469,8 @@ FOR EACH OVERLAY in the storyboard:
 
 ## Constraints
 - NEVER ask for input. Make all creative decisions yourself.
+- Default mode is review-first: do not render final output until explicit approval.
+- Render command is approval-gated. Use `npm run render -- --yes` only after approval.
 - If you're unsure about a year/name/fact from the transcript: 
   use exactly what the voiceover says (don't fact-check externally)
 - Maximum 3 fix iterations per overlay

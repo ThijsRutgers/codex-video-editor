@@ -1,8 +1,10 @@
 import React from "react";
 import {
   AbsoluteFill,
+  Img,
   interpolate,
   spring,
+  staticFile,
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
@@ -11,11 +13,13 @@ import { DOC_COLORS, DOC_FONTS, DOC_SHADOW } from "./theme";
 interface PersonLabelProps {
   name: string;
   role: string;
+  imageSrc?: string;
 }
 
-export const PersonLabel: React.FC<PersonLabelProps> = ({ name, role }) => {
+export const PersonLabel: React.FC<PersonLabelProps> = ({ name, role, imageSrc }) => {
   const frame = useCurrentFrame();
-  const { fps, durationInFrames } = useVideoConfig();
+  const { fps, durationInFrames, width, height } = useVideoConfig();
+  const hasImage = !!imageSrc;
 
   const lineProgress = spring({
     frame,
@@ -29,6 +33,12 @@ export const PersonLabel: React.FC<PersonLabelProps> = ({ name, role }) => {
     config: { damping: 16, mass: 0.9, stiffness: 120 },
   });
 
+  const imageProgress = spring({
+    frame: frame - 2,
+    fps,
+    config: { damping: 16, mass: 0.9, stiffness: 120 },
+  });
+
   const outOpacity = interpolate(
     frame,
     [durationInFrames - 14, durationInFrames],
@@ -36,13 +46,52 @@ export const PersonLabel: React.FC<PersonLabelProps> = ({ name, role }) => {
     { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
   );
 
+  const portraitWidth = Math.round(Math.min(width * 0.5, 980));
+  const portraitHeight = Math.round(Math.min(height * 0.96, 1040));
+  const portraitLeft = Math.round(width * 0.02) - 32;
+  const portraitBottom = Math.round(height * 0.02) - 16;
+  const cardLeft = hasImage
+    ? Math.max(72, Math.round(Math.min(width * 0.44, width - 760)))
+    : 80;
+  const cardBottom = hasImage ? 108 : 128;
+  const cardMaxWidth = hasImage ? 640 : 700;
+
   return (
     <AbsoluteFill>
+      {imageSrc ? (
+        <div
+          style={{
+            position: "absolute",
+            left: portraitLeft,
+            bottom: portraitBottom,
+            width: portraitWidth,
+            height: portraitHeight,
+            transform: `translateX(${interpolate(imageProgress, [0, 1], [-320, 0])}px)`,
+            opacity: interpolate(imageProgress, [0, 1], [0, 1]),
+            display: "flex",
+            alignItems: "flex-end",
+            justifyContent: "center",
+            pointerEvents: "none",
+          }}
+        >
+          <Img
+            src={staticFile(imageSrc)}
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "contain",
+              filter:
+                "drop-shadow(0 24px 32px rgba(0,0,0,0.58)) drop-shadow(0 3px 14px rgba(0,0,0,0.50))",
+            }}
+          />
+        </div>
+      ) : null}
+
       <div
         style={{
           position: "absolute",
-          left: 80,
-          bottom: 128,
+          left: cardLeft,
+          bottom: cardBottom,
           display: "flex",
           alignItems: "stretch",
           opacity: outOpacity,
@@ -66,8 +115,8 @@ export const PersonLabel: React.FC<PersonLabelProps> = ({ name, role }) => {
             backgroundColor: DOC_COLORS.card,
             border: `1px solid ${DOC_COLORS.divider}`,
             borderRadius: 10,
-            padding: "14px 20px",
-            maxWidth: 700,
+            padding: "16px 22px",
+            maxWidth: cardMaxWidth,
           }}
         >
           <div

@@ -13,14 +13,54 @@ chmod +x setup.sh && ./setup.sh
 # 2. Add your video
 cp ~/Downloads/my-video.mp4 public/video.mp4
 
-# 3. Start Remotion Studio (terminal 1)
-npm run dev
-
-# 4. Start Codex (terminal 2)
+# 3. Start Codex (terminal 1)
 codex
 
-# 5. Paste your prompt (see examples below)
+# 4. Prepare overlays for review (no final render yet)
+npm run prepare:review
+
+# 5. Open Remotion timeline to review
+npm run dev
+
+# 6. Only after approval, render final export
+npm run render -- --yes
 ```
+
+### Person image fly-ins (auto)
+
+When a `person_label` overlay exists (for example Donald Trump or Greg Laurie),
+you can auto-fetch a portrait image, optionally remove the background, and
+inject it into the overlay.
+
+```bash
+# Required: set your RapidAPI key (do not hardcode it in files)
+export RAPIDAPI_KEY="your-key-here"
+
+# Optional for transparent cutouts
+pip install rembg
+
+# Optional: auto-detect person labels from transcript (new overlays)
+npm run autolabel:people
+
+# Replace all existing person labels with auto-detected ones
+npm run autolabel:people -- --replace-existing --force
+
+# Enrich person labels with images
+npm run enrich:people
+```
+
+The script updates `data/storyboard.json` by adding
+`content.imageSrc` for each `person_label`, and stores generated files under
+`public/assets/people/`.
+
+Person fly-ins are part of the standard editing kit:
+- large left-side portrait cutout (not a small corner thumbnail)
+- person name card remains visible with role text
+- same timing logic as `person_label` overlays
+
+Render safety:
+- `npm run render` is blocked by default (review-first mode)
+- only explicit approval renders: `npm run render -- --yes`
 
 ## Example Prompts
 

@@ -12,6 +12,7 @@ data/transcript.json
 public/audio.wav
 public/audio-20.wav
 public/video.mp4
+public/assets/people/
 
 # Generated review frames
 review-frames/**/*.png

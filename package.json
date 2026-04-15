@@ -4,10 +4,18 @@
   "description": "Autonomous AI video editor powered by Codex + Remotion",
   "scripts": {
     "dev": "npx remotion studio",
-    "build": "npx remotion render MainComposition out/final.mp4 --crf=18",
-    "render": "npx remotion render MainComposition out/final.mp4 --crf=18",
+    "review": "npm run dev",
+    "prepare:review": "npm run transcribe && npm run storyboard:generate && npm run autolabel:people -- --force && npm run storyboard:budget && npm run enrich:people",
+    "build": "npm run render",
+    "render": "npx tsx scripts/render-with-approval.ts",
+    "render:approved": "npm run render -- --yes",
     "render:preview": "npx remotion render MainComposition out/preview.mp4 --crf=28 --scale=0.5",
     "transcribe": "npx tsx scripts/transcribe.ts",
+    "storyboard:generate": "npx tsx scripts/generate-storyboard.ts",
+    "storyboard:budget": "npx tsx scripts/apply-overlay-budget.ts",
+    "autolabel:people": "npx tsx scripts/auto-person-labels.ts",
+    "enrich:people": "npx tsx scripts/enrich-person-overlays.ts",
+    "project:new": "npx tsx scripts/new-project.ts",
     "review-frame": "npx remotion still MainComposition --output=review-frames/check.png"
   },
   "dependencies": {

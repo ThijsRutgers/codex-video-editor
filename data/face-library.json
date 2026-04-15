@@ -1,0 +1,71 @@
+{
+  "version": 1,
+  "people": [
+    {
+      "name": "Ali Khamenei",
+      "aliases": [
+        "Ayatollah Ali Khamenei",
+        "Khamenei"
+      ],
+      "role": "Supreme Leader",
+      "imageSrc": "assets/people/ali-khamenei.png"
+    },
+    {
+      "name": "Amihai Eliyahu",
+      "aliases": [],
+      "role": "Israeli Heritage Minister",
+      "imageSrc": "assets/people/amihai-eliyahu.png",
+      "imageSourceUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Amichai_Eliyahu.jpg/250px-Amichai_Eliyahu.jpg",
+      "updatedAt": "2026-04-15T07:51:30.750Z"
+    },
+    {
+      "name": "Donald Trump",
+      "aliases": [
+        "President Trump",
+        "Trump"
+      ],
+      "role": "U.S. President",
+      "imageSrc": "assets/people/donald-trump.png"
+    },
+    {
+      "name": "Edgar Whisenant",
+      "aliases": [],
+      "role": "Author, Rapture Date Prediction",
+      "imageSrc": "assets/people/edgar-whisenant.png",
+      "imageSourceUrl": "https://alchetron.com/cdn/edgar-c-whisenant-5144d392-79ad-44b8-9f1a-3d630ab54aa-resize-750.png",
+      "updatedAt": "2026-04-15T09:02:46.018Z"
+    },
+    {
+      "name": "Ezekiel",
+      "aliases": [],
+      "role": "Hebrew Prophet",
+      "imageSrc": "assets/people/ezekiel.png",
+      "imageSourceUrl": "https://upload.wikimedia.org/wikipedia/commons/5/5a/Ezekiel_by_Michelangelo%2C_restored_-_large.jpg",
+      "updatedAt": "2026-04-15T09:03:12.705Z"
+    },
+    {
+      "name": "Greg Laurie",
+      "aliases": [
+        "Pastor Greg Laurie"
+      ],
+      "role": "Pastor",
+      "imageSrc": "assets/people/greg-laurie.png"
+    },
+    {
+      "name": "Harold Camping",
+      "aliases": [],
+      "role": "Radio Broadcaster",
+      "imageSrc": "assets/people/harold-camping.png",
+      "imageSourceUrl": "https://upload.wikimedia.org/wikipedia/en/4/4a/Harold_Camping_new.jpg",
+      "updatedAt": "2026-04-15T07:49:54.393Z"
+    },
+    {
+      "name": "King Cyrus",
+      "aliases": [
+        "Cyrus"
+      ],
+      "role": "King",
+      "imageSrc": "assets/people/king-cyrus.png"
+    }
+  ]
+}

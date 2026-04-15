@@ -163,6 +163,11 @@ export const MainComposition: React.FC = () => {
               <PersonLabel
                 name={String(overlay.content.name ?? "")}
                 role={String(overlay.content.role ?? "")}
+                imageSrc={
+                  overlay.content.imageSrc
+                    ? String(overlay.content.imageSrc)
+                    : undefined
+                }
               />
             ) : null}
 
