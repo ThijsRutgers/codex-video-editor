@@ -4,6 +4,7 @@ export { SectionTitle } from "./SectionTitle";
 export { OpeningTitle } from "./OpeningTitle";
 export { LogoOutro } from "./LogoOutro";
 export { AnimatedCaptions } from "./AnimatedCaptions";
+export { ExplainerCard } from "./ExplainerCard";
 export { YearStamp } from "./YearStamp";
 export { LocationLabel } from "./LocationLabel";
 export { KeyFact } from "./KeyFact";

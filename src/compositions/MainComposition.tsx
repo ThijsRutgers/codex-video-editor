@@ -12,6 +12,7 @@ import { loadFont as loadPlayfairFont } from "@remotion/google-fonts/PlayfairDis
 import { loadFont as loadJetBrainsMonoFont } from "@remotion/google-fonts/JetBrainsMono";
 import {
   AnimatedCaptions,
+  ExplainerCard,
   KeyFact,
   LocationLabel,
   LogoOutro,
@@ -37,6 +38,7 @@ type OverlayType =
   | "location_label"
   | "key_fact"
   | "quote_card"
+  | "explainer_card"
   | "person_label"
   | "outro";
 
@@ -156,6 +158,20 @@ export const MainComposition: React.FC = () => {
                 quote={String(overlay.content.quote ?? "")}
                 attribution={String(overlay.content.attribution ?? "")}
                 year={String(overlay.content.year ?? "") || undefined}
+              />
+            ) : null}
+
+            {overlay.type === "explainer_card" ? (
+              <ExplainerCard
+                eyebrow={String(overlay.content.eyebrow ?? "Name")}
+                title={String(overlay.content.title ?? "")}
+                detail={String(overlay.content.detail ?? "")}
+                side={overlay.content.side === "right" ? "right" : "left"}
+                accentColor={
+                  overlay.content.accentColor
+                    ? String(overlay.content.accentColor)
+                    : undefined
+                }
               />
             ) : null}
 

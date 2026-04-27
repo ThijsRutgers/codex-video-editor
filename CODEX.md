@@ -327,12 +327,15 @@ FOR EACH OVERLAY in the storyboard:
 
 ### STEP 9: Final Render + Report (Only After Approval)
 1. `npm run render -- --yes`
+   - The render script must choose the next available versioned filename:
+     `out/final-1.mp4`, `out/final-2.mp4`, etc.
+   - Never render to unversioned `out/final.mp4`.
 2. Print report:
 ```
 ✅ DOCUMENTARY EDIT COMPLETE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-📁 out/final.mp4
+📁 out/final-N.mp4
 ⏱  [duration] | [resolution]
 
 🎬 Title: "[title]"
@@ -471,6 +474,8 @@ FOR EACH OVERLAY in the storyboard:
 - NEVER ask for input. Make all creative decisions yourself.
 - Default mode is review-first: do not render final output until explicit approval.
 - Render command is approval-gated. Use `npm run render -- --yes` only after approval.
+- Approved renders must be versioned. Use the next available
+  `out/final-N.mp4` filename and never overwrite or target `out/final.mp4`.
 - If you're unsure about a year/name/fact from the transcript: 
   use exactly what the voiceover says (don't fact-check externally)
 - Maximum 3 fix iterations per overlay
