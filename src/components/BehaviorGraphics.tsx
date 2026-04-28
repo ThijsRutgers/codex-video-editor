@@ -21,6 +21,7 @@ interface GraphicShellProps {
   accentColor?: string;
   durationFrames: number;
   width?: number;
+  splitMinHeight?: number;
   children: React.ReactNode;
 }
 
@@ -40,6 +41,7 @@ const GraphicShell: React.FC<GraphicShellProps> = ({
   accentColor = DOC_COLORS.accent,
   durationFrames,
   width = 520,
+  splitMinHeight,
   children,
 }) => {
   const frame = useCurrentFrame();
@@ -53,7 +55,7 @@ const GraphicShell: React.FC<GraphicShellProps> = ({
   const scale = interpolate(enter, [0, 1], [0.98, 1]);
   const opacity = fade(frame, durationFrames);
   const isSplit = layout === "split";
-  const splitWidth = Math.min(Math.round(width * 1.28), 760);
+  const splitWidth = Math.min(Math.round(width * 1.5), 840);
 
   const positionStyle: React.CSSProperties = isSplit
     ? side === "left"
@@ -62,6 +64,93 @@ const GraphicShell: React.FC<GraphicShellProps> = ({
     : side === "left"
       ? { left: 72, top: 70 }
       : { right: 72, top: 70 };
+
+  if (isSplit) {
+    return (
+      <AbsoluteFill>
+        <div
+          style={{
+            position: "absolute",
+            ...positionStyle,
+            width: "50%",
+            height: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "48px 54px",
+            boxSizing: "border-box",
+            opacity,
+            transform: `translateX(${slide * 0.45}px) scale(${scale})`,
+            pointerEvents: "none",
+          }}
+        >
+          <div
+            style={{
+              width: splitWidth,
+              maxWidth: "100%",
+              minHeight: splitMinHeight,
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              filter: "drop-shadow(0 20px 34px rgba(0,0,0,0.34))",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "flex-start",
+                gap: 13,
+                marginBottom: 26,
+              }}
+            >
+              <div
+                style={{
+                  width: 9,
+                  height: 9,
+                  borderRadius: 999,
+                  marginTop: 12,
+                  flex: "0 0 auto",
+                  backgroundColor: accentColor,
+                  boxShadow: `0 0 18px ${accentColor}CC`,
+                }}
+              />
+              <div>
+                <div
+                  style={{
+                    fontFamily: DOC_FONTS.mono,
+                    fontWeight: 700,
+                    fontSize: 15,
+                    lineHeight: 1,
+                    textTransform: "uppercase",
+                    letterSpacing: 1.3,
+                    color: accentColor,
+                    textShadow: DOC_SHADOW,
+                  }}
+                >
+                  {eyebrow}
+                </div>
+                <div
+                  style={{
+                    marginTop: 9,
+                    fontFamily: DOC_FONTS.sans,
+                    fontWeight: 800,
+                    fontSize: 38,
+                    lineHeight: 1.04,
+                    color: DOC_COLORS.textPrimary,
+                    textShadow: "0 3px 18px rgba(0,0,0,0.86)",
+                  }}
+                >
+                  {title}
+                </div>
+              </div>
+            </div>
+
+            <div>{children}</div>
+          </div>
+        </div>
+      </AbsoluteFill>
+    );
+  }
 
   return (
     <AbsoluteFill>
@@ -75,7 +164,7 @@ const GraphicShell: React.FC<GraphicShellProps> = ({
           display: isSplit ? "flex" : undefined,
           alignItems: isSplit ? "center" : undefined,
           justifyContent: isSplit ? "center" : undefined,
-          padding: isSplit ? "58px 68px" : undefined,
+          padding: isSplit ? "46px 54px" : undefined,
           boxSizing: "border-box",
           opacity,
           transform: `translateX(${isSplit ? slide * 0.45 : slide}px) scale(${scale})`,
@@ -87,11 +176,15 @@ const GraphicShell: React.FC<GraphicShellProps> = ({
           style={{
             width: isSplit ? splitWidth : "100%",
             maxWidth: "100%",
+            minHeight: isSplit ? splitMinHeight : undefined,
             border: `1px solid ${DOC_COLORS.divider}`,
             borderRadius: 8,
             overflow: "hidden",
-            backgroundColor: "rgba(8, 10, 15, 0.84)",
-            backdropFilter: "blur(10px)",
+            backgroundColor: isSplit ? "rgba(8, 10, 15, 0.62)" : "rgba(8, 10, 15, 0.84)",
+            backdropFilter: isSplit ? "blur(14px) saturate(1.08)" : "blur(10px)",
+            boxShadow: isSplit
+              ? "inset 0 1px 0 rgba(255,255,255,0.06), 0 26px 62px rgba(0,0,0,0.34)"
+              : undefined,
           }}
         >
           <div
@@ -99,7 +192,7 @@ const GraphicShell: React.FC<GraphicShellProps> = ({
               display: "flex",
               alignItems: "center",
               gap: 12,
-              padding: "14px 18px 10px",
+              padding: isSplit ? "20px 26px 16px" : "14px 18px 10px",
               borderBottom: "1px solid rgba(240,237,230,0.12)",
             }}
           >
@@ -117,7 +210,7 @@ const GraphicShell: React.FC<GraphicShellProps> = ({
                 style={{
                   fontFamily: DOC_FONTS.mono,
                   fontWeight: 700,
-                  fontSize: 14,
+                  fontSize: isSplit ? 15 : 14,
                   lineHeight: 1,
                   textTransform: "uppercase",
                   letterSpacing: 1.1,
@@ -129,10 +222,10 @@ const GraphicShell: React.FC<GraphicShellProps> = ({
               </div>
               <div
                 style={{
-                  marginTop: 5,
+                  marginTop: isSplit ? 8 : 5,
                   fontFamily: DOC_FONTS.sans,
                   fontWeight: 700,
-                  fontSize: 27,
+                  fontSize: isSplit ? 34 : 27,
                   lineHeight: 1.08,
                   color: DOC_COLORS.textPrimary,
                   textShadow: DOC_SHADOW,
@@ -143,7 +236,7 @@ const GraphicShell: React.FC<GraphicShellProps> = ({
             </div>
           </div>
 
-          <div style={{ padding: 18 }}>{children}</div>
+          <div style={{ padding: isSplit ? 28 : 18 }}>{children}</div>
         </div>
       </div>
     </AbsoluteFill>
@@ -274,11 +367,18 @@ export const ScentBridge: React.FC<ScentBridgeProps> = ({
   durationFrames,
 }) => {
   const frame = useCurrentFrame();
+  const isSplit = layout === "split";
   const dash = interpolate(frame, [0, durationFrames], [68, 0], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
   const pulse = interpolate(Math.sin(frame / 4), [-1, 1], [0.72, 1]);
+  const bridgeHeight = isSplit ? 420 : 152;
+  const viewBox = isSplit ? "0 0 780 420" : "0 0 470 152";
+  const bridgePath = isSplit
+    ? "M120 232 C238 86, 424 326, 660 126"
+    : "M92 78 C160 16, 285 134, 378 54";
+  const pulseCenter = isSplit ? { x: 390, y: 210 } : { x: 235, y: 78 };
 
   return (
     <GraphicShell
@@ -288,33 +388,45 @@ export const ScentBridge: React.FC<ScentBridgeProps> = ({
       layout={layout}
       accentColor={accentColor}
       durationFrames={durationFrames}
+      width={isSplit ? 620 : 520}
+      splitMinHeight={560}
     >
-      <div style={{ position: "relative", height: 152 }}>
+      <div style={{ position: "relative", height: bridgeHeight }}>
         <svg
           width="100%"
           height="100%"
-          viewBox="0 0 470 152"
+          viewBox={viewBox}
           style={{ position: "absolute", inset: 0 }}
         >
           <path
-            d="M92 78 C160 16, 285 134, 378 54"
+            d={bridgePath}
             fill="none"
             stroke={accentColor}
-            strokeWidth="5"
+            strokeWidth={isSplit ? 7 : 5}
             strokeLinecap="round"
-            strokeDasharray="8 16"
+            strokeDasharray={isSplit ? "12 22" : "8 16"}
             strokeDashoffset={dash}
             opacity="0.92"
           />
-          <circle cx="235" cy="78" r={8 + pulse * 4} fill={`${accentColor}66`} />
+          <circle
+            cx={pulseCenter.x}
+            cy={pulseCenter.y}
+            r={(isSplit ? 12 : 8) + pulse * (isSplit ? 5 : 4)}
+            fill={`${accentColor}66`}
+          />
         </svg>
 
         <div
           style={{
             position: "absolute",
             left: 0,
-            top: 42,
-            ...chipStyle("#F97316", { minWidth: 118, textAlign: "center" }),
+            top: isSplit ? 208 : 42,
+            ...chipStyle("#F97316", {
+              minWidth: isSplit ? 142 : 118,
+              textAlign: "center",
+              fontSize: isSplit ? 24 : 20,
+              padding: isSplit ? "10px 16px" : "8px 12px",
+            }),
           }}
         >
           {source}
@@ -323,8 +435,13 @@ export const ScentBridge: React.FC<ScentBridgeProps> = ({
           style={{
             position: "absolute",
             right: 0,
-            top: 18,
-            ...chipStyle("#86EFAC", { minWidth: 126, textAlign: "center" }),
+            top: isSplit ? 118 : 18,
+            ...chipStyle("#86EFAC", {
+              minWidth: isSplit ? 150 : 126,
+              textAlign: "center",
+              fontSize: isSplit ? 24 : 20,
+              padding: isSplit ? "10px 16px" : "8px 12px",
+            }),
           }}
         >
           {target}
@@ -332,12 +449,12 @@ export const ScentBridge: React.FC<ScentBridgeProps> = ({
         <div
           style={{
             position: "absolute",
-            left: 128,
-            right: 128,
-            bottom: 0,
+            left: isSplit ? 76 : 128,
+            right: isSplit ? 76 : 128,
+            bottom: isSplit ? 34 : 0,
             fontFamily: DOC_FONTS.sans,
             fontWeight: 600,
-            fontSize: 21,
+            fontSize: isSplit ? 26 : 21,
             lineHeight: 1.2,
             textAlign: "center",
             color: GRAPHIC_DETAIL,
@@ -370,6 +487,22 @@ export const RewardLoop: React.FC<RewardLoopProps> = ({
 }) => {
   const frame = useCurrentFrame();
   const spin = (frame * 2.4) % 360;
+  const isSplit = layout === "split";
+  const loopHeight = isSplit ? 430 : 238;
+  const centerY = isSplit ? 202 : 106;
+  const radiusX = isSplit ? 184 : 162;
+  const radiusY = isSplit ? 128 : 72;
+  const nodePositions = isSplit
+    ? [
+        { left: 12, top: 180 },
+        { left: 260, top: 38 },
+        { right: 12, top: 180 },
+      ]
+    : [
+        { left: 0, top: 74 },
+        { left: 178, top: 0 },
+        { right: 0, top: 74 },
+      ];
 
   return (
     <GraphicShell
@@ -380,48 +513,46 @@ export const RewardLoop: React.FC<RewardLoopProps> = ({
       accentColor={accentColor}
       durationFrames={durationFrames}
       width={548}
+      splitMinHeight={630}
     >
-      <div style={{ position: "relative", height: 238 }}>
+      <div style={{ position: "relative", height: loopHeight }}>
         <svg
           width="100%"
           height="100%"
-          viewBox="0 0 510 238"
+          viewBox={`0 0 510 ${loopHeight}`}
           style={{ position: "absolute", inset: 0 }}
         >
           <ellipse
             cx="255"
-            cy="106"
-            rx="162"
-            ry="72"
+            cy={centerY}
+            rx={radiusX}
+            ry={radiusY}
             fill="none"
             stroke={`${accentColor}80`}
-            strokeWidth="4"
-            strokeDasharray="12 12"
+            strokeWidth={isSplit ? 5 : 4}
+            strokeDasharray={isSplit ? "14 13" : "12 12"}
           />
           <circle
-            cx={255 + Math.cos((spin * Math.PI) / 180) * 162}
-            cy={106 + Math.sin((spin * Math.PI) / 180) * 72}
-            r="8"
+            cx={255 + Math.cos((spin * Math.PI) / 180) * radiusX}
+            cy={centerY + Math.sin((spin * Math.PI) / 180) * radiusY}
+            r={isSplit ? 10 : 8}
             fill={accentColor}
           />
         </svg>
 
         {steps.slice(0, 3).map((step, index) => {
-          const positions = [
-            { left: 0, top: 74 },
-            { left: 178, top: 0 },
-            { right: 0, top: 74 },
-          ];
           return (
             <div
               key={step}
               style={{
                 position: "absolute",
-                ...positions[index],
+                ...nodePositions[index],
                 ...chipStyle(index === 1 ? "#7DD3FC" : accentColor, {
                   borderRadius: 8,
-                  minWidth: 132,
+                  minWidth: isSplit ? 154 : 132,
                   textAlign: "center",
+                  fontSize: isSplit ? 24 : 20,
+                  padding: isSplit ? "11px 16px" : "8px 12px",
                 }),
               }}
             >
@@ -433,12 +564,12 @@ export const RewardLoop: React.FC<RewardLoopProps> = ({
         <div
           style={{
             position: "absolute",
-            left: 54,
-            right: 54,
-            bottom: 8,
+            left: isSplit ? 34 : 54,
+            right: isSplit ? 34 : 54,
+            bottom: isSplit ? 18 : 8,
             fontFamily: DOC_FONTS.sans,
             fontWeight: 600,
-            fontSize: 22,
+            fontSize: isSplit ? 25 : 22,
             lineHeight: 1.22,
             textAlign: "center",
             color: GRAPHIC_DETAIL,

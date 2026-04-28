@@ -39,6 +39,7 @@ If multiple paths are present, use the first valid local video path unless the u
 - Keep pacing restrained and do not overdecorate the video. For a 1-2 minute video, prefer about 5 strong visual explanation moments unless the script clearly needs more; remove generic or redundant overlays even if the generator created them.
 - For larger explanatory animations, prefer a 50/50 split layout: crop/center the source video on one half, place the animation large on the other half, then transition smoothly back to full-screen video when the animation ends.
 - In split layout, avoid a flat black animation half. Use the current video as a dynamic background when possible: stretch/sync the video behind the graphic, apply heavy blur, darkening, and subtle saturation/vignette so the panel feels cinematic while remaining readable.
+- Treat each split half as its own Remotion design canvas, not as a place to put a smaller 16:9 overlay card. In a 1920x1080 composition, each half is effectively a 960x1080 portrait-like canvas; design diagrams, loops, meters, timelines, and labels to use that full vertical space. Prefer native split-scene layouts with floating text/chips directly over the blurred video background instead of large black boxes.
 - If the repo lacks a needed overlay component, add a small reusable component rather than forcing the wrong existing overlay type.
 5. Perform a custom Remotion animation pass when it would improve the edit:
 - Use Remotion as a motion graphics system, not only an overlay renderer.
