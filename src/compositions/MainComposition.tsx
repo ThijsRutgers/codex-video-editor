@@ -3,6 +3,7 @@ import {
   AbsoluteFill,
   OffthreadVideo,
   Sequence,
+  interpolate,
   staticFile,
   useCurrentFrame,
   useVideoConfig,
@@ -14,12 +15,18 @@ import {
   AnimatedCaptions,
   ExplainerCard,
   KeyFact,
+  KeepAwayChain,
   LocationLabel,
   LogoOutro,
+  MotivationMap,
   OpeningTitle,
   PersonLabel,
   QuoteCard,
+  ResponseReframe,
+  RewardLoop,
+  ScentBridge,
   SectionTitle,
+  StimulationMeter,
   YearStamp,
   type CaptionWord,
 } from "../components";
@@ -40,7 +47,13 @@ type OverlayType =
   | "quote_card"
   | "explainer_card"
   | "person_label"
-  | "outro";
+  | "outro"
+  | "motivation_map"
+  | "scent_bridge"
+  | "reward_loop"
+  | "stimulation_meter"
+  | "keepaway_chain"
+  | "response_reframe";
 
 type StoryboardOverlay = {
   id: string;
@@ -53,6 +66,9 @@ type StoryboardOverlay = {
 const toFrame = (seconds: number, fps: number): number => {
   return Math.max(0, Math.round(seconds * fps));
 };
+
+const SPLIT_TRANSITION_FRAMES = 18;
+const SPLIT_BACKDROP_BLUR = 34;
 
 const cleanCaptions = (words: CaptionWord[]): CaptionWord[] => {
   return words
@@ -78,6 +94,50 @@ const cleanCaptions = (words: CaptionWord[]): CaptionWord[] => {
     });
 };
 
+const asStringList = (value: unknown, fallback: string[]): string[] => {
+  if (!Array.isArray(value)) {
+    return fallback;
+  }
+
+  const result = value.map((item) => String(item)).filter(Boolean);
+  return result.length > 0 ? result : fallback;
+};
+
+const asMeters = (
+  value: unknown,
+  fallback: Array<{ label: string; value: number }>
+): Array<{ label: string; value: number }> => {
+  if (!Array.isArray(value)) {
+    return fallback;
+  }
+
+  const result = value
+    .map((item) => {
+      if (!item || typeof item !== "object") {
+        return null;
+      }
+
+      const record = item as Record<string, unknown>;
+      return {
+        label: String(record.label ?? ""),
+        value: Number(record.value ?? 0),
+      };
+    })
+    .filter((item): item is { label: string; value: number } => {
+      return !!item && !!item.label && Number.isFinite(item.value);
+    });
+
+  return result.length > 0 ? result : fallback;
+};
+
+const isSplitOverlay = (overlay: StoryboardOverlay): boolean => {
+  return overlay.content.layout === "split";
+};
+
+const getGraphicSide = (overlay: StoryboardOverlay): "left" | "right" => {
+  return overlay.content.side === "left" ? "left" : "right";
+};
+
 export const MainComposition: React.FC = () => {
   const { width, height, fps } = useVideoConfig();
   const frame = useCurrentFrame();
@@ -91,6 +151,45 @@ export const MainComposition: React.FC = () => {
   const captionWords = useMemo(() => {
     return cleanCaptions(transcriptData.words as CaptionWord[]);
   }, []);
+
+  const activeSplit = useMemo(() => {
+    return overlays.find((overlay) => {
+      if (!isSplitOverlay(overlay)) {
+        return false;
+      }
+
+      const from = toFrame(overlay.startTime, fps);
+      const to = from + toFrame(overlay.duration, fps);
+      return frame >= from && frame < to;
+    });
+  }, [fps, frame, overlays]);
+
+  const splitProgress = useMemo(() => {
+    if (!activeSplit) {
+      return 0;
+    }
+
+    const from = toFrame(activeSplit.startTime, fps);
+    const to = from + toFrame(activeSplit.duration, fps);
+
+    return interpolate(
+      frame,
+      [
+        from,
+        from + SPLIT_TRANSITION_FRAMES,
+        Math.max(from + SPLIT_TRANSITION_FRAMES + 1, to - SPLIT_TRANSITION_FRAMES),
+        to,
+      ],
+      [0, 1, 1, 0],
+      { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+    );
+  }, [activeSplit, fps, frame]);
+
+  const graphicSide = activeSplit ? getGraphicSide(activeSplit) : "right";
+  const videoSide = graphicSide === "left" ? "right" : "left";
+  const videoLeft = splitProgress * (videoSide === "right" ? width / 2 : 0);
+  const videoWidth = width - splitProgress * (width / 2);
+  const graphicBackdropLeft = graphicSide === "right" ? width / 2 : 0;
 
   const isLowerThirdBusy = useMemo(() => {
     return overlays.some((overlay) => {
@@ -106,14 +205,96 @@ export const MainComposition: React.FC = () => {
 
   return (
     <AbsoluteFill style={{ backgroundColor: "#000" }}>
-      <OffthreadVideo
-        src={staticFile("video.mp4")}
+      <AbsoluteFill
         style={{
-          width,
-          height,
-          objectFit: "cover",
+          background:
+            "linear-gradient(135deg, #050609 0%, #0d1016 54%, #050609 100%)",
         }}
       />
+
+      {splitProgress > 0 ? (
+        <div
+          style={{
+            position: "absolute",
+            left: graphicBackdropLeft,
+            top: 0,
+            width: width / 2,
+            height,
+            overflow: "hidden",
+            opacity: splitProgress,
+          }}
+        >
+          <OffthreadVideo
+            src={staticFile("video.mp4")}
+            muted
+            style={{
+              position: "absolute",
+              left: graphicSide === "right" ? -width / 2 : 0,
+              top: 0,
+              width,
+              height,
+              objectFit: "cover",
+              objectPosition: "center center",
+              filter: `blur(${SPLIT_BACKDROP_BLUR}px) saturate(1.24) brightness(0.78)`,
+              transform: "scale(1.1)",
+            }}
+          />
+          <AbsoluteFill
+            style={{
+              background:
+                "radial-gradient(circle at 50% 42%, rgba(212,168,83,0.12), rgba(5,6,9,0.24) 44%, rgba(5,6,9,0.58) 100%)",
+            }}
+          />
+          <AbsoluteFill
+            style={{
+              background:
+                graphicSide === "right"
+                  ? "linear-gradient(90deg, rgba(5,6,9,0.54), rgba(5,6,9,0.10) 24%, rgba(5,6,9,0.26))"
+                  : "linear-gradient(270deg, rgba(5,6,9,0.54), rgba(5,6,9,0.10) 24%, rgba(5,6,9,0.26))",
+            }}
+          />
+        </div>
+      ) : null}
+
+      <div
+        style={{
+          position: "absolute",
+          left: videoLeft,
+          top: 0,
+          width: videoWidth,
+          height,
+          overflow: "hidden",
+          boxShadow:
+            splitProgress > 0
+              ? "0 0 0 1px rgba(240,237,230,0.10), 0 22px 48px rgba(0,0,0,0.36)"
+              : "none",
+        }}
+      >
+        <OffthreadVideo
+          src={staticFile("video.mp4")}
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            objectPosition: "center center",
+          }}
+        />
+      </div>
+
+      {splitProgress > 0.02 ? (
+        <div
+          style={{
+            position: "absolute",
+            left: width / 2 - 1,
+            top: 0,
+            width: 2,
+            height,
+            opacity: splitProgress,
+            background:
+              "linear-gradient(180deg, transparent, rgba(240,237,230,0.24), transparent)",
+          }}
+        />
+      ) : null}
 
       {overlays.map((overlay) => {
         const from = toFrame(overlay.startTime, fps);
@@ -167,6 +348,7 @@ export const MainComposition: React.FC = () => {
                 title={String(overlay.content.title ?? "")}
                 detail={String(overlay.content.detail ?? "")}
                 side={overlay.content.side === "right" ? "right" : "left"}
+                layout={overlay.content.layout === "split" ? "split" : "overlay"}
                 accentColor={
                   overlay.content.accentColor
                     ? String(overlay.content.accentColor)
@@ -197,6 +379,91 @@ export const MainComposition: React.FC = () => {
                 }
               />
             ) : null}
+
+            {overlay.type === "motivation_map" ? (
+              <MotivationMap
+                center={String(overlay.content.center ?? "Not spite")}
+                items={asStringList(overlay.content.items, [
+                  "Instinct",
+                  "Attention",
+                  "Bonding",
+                ])}
+                side={overlay.content.side === "left" ? "left" : "right"}
+                layout={overlay.content.layout === "split" ? "split" : "overlay"}
+                accentColor={String(overlay.content.accentColor ?? "#F97316")}
+                durationFrames={durationInFrames}
+              />
+            ) : null}
+
+            {overlay.type === "scent_bridge" ? (
+              <ScentBridge
+                source={String(overlay.content.source ?? "Your item")}
+                target={String(overlay.content.target ?? "Comfort")}
+                detail={String(overlay.content.detail ?? "Familiar smell becomes a cue.")}
+                side={overlay.content.side === "right" ? "right" : "left"}
+                layout={overlay.content.layout === "split" ? "split" : "overlay"}
+                accentColor={String(overlay.content.accentColor ?? "#7DD3FC")}
+                durationFrames={durationInFrames}
+              />
+            ) : null}
+
+            {overlay.type === "reward_loop" ? (
+              <RewardLoop
+                steps={asStringList(overlay.content.steps, [
+                  "Grab",
+                  "You react",
+                  "Reward",
+                ])}
+                detail={String(overlay.content.detail ?? "The chase can train the pattern.")}
+                side={overlay.content.side === "right" ? "right" : "left"}
+                layout={overlay.content.layout === "split" ? "split" : "overlay"}
+                accentColor={String(overlay.content.accentColor ?? "#F472B6")}
+                durationFrames={durationInFrames}
+              />
+            ) : null}
+
+            {overlay.type === "stimulation_meter" ? (
+              <StimulationMeter
+                meters={asMeters(overlay.content.meters, [
+                  { label: "Mental work", value: 32 },
+                  { label: "Physical play", value: 38 },
+                ])}
+                detail={String(overlay.content.detail ?? "Belongings become the game.")}
+                side={overlay.content.side === "left" ? "left" : "right"}
+                layout={overlay.content.layout === "split" ? "split" : "overlay"}
+                accentColor={String(overlay.content.accentColor ?? "#86EFAC")}
+                durationFrames={durationInFrames}
+              />
+            ) : null}
+
+            {overlay.type === "keepaway_chain" ? (
+              <KeepAwayChain
+                steps={asStringList(overlay.content.steps, [
+                  "Take object",
+                  "Run off",
+                  "Invite play",
+                ])}
+                side={overlay.content.side === "right" ? "right" : "left"}
+                layout={overlay.content.layout === "split" ? "split" : "overlay"}
+                accentColor={String(overlay.content.accentColor ?? "#A78BFA")}
+                durationFrames={durationInFrames}
+              />
+            ) : null}
+
+            {overlay.type === "response_reframe" ? (
+              <ResponseReframe
+                bad={String(overlay.content.bad ?? "disobedience")}
+                good={String(overlay.content.good ?? "communication")}
+                detail={String(
+                  overlay.content.detail ??
+                    "Respond to the need instead of only the stolen object."
+                )}
+                side={overlay.content.side === "left" ? "left" : "right"}
+                layout={overlay.content.layout === "split" ? "split" : "overlay"}
+                accentColor={String(overlay.content.accentColor ?? "#D4A853")}
+                durationFrames={durationInFrames}
+              />
+            ) : null}
           </Sequence>
         );
       })}
@@ -208,6 +475,15 @@ export const MainComposition: React.FC = () => {
         maxWordsPerPage={5}
         fontSize={40}
         bottom={isLowerThirdBusy ? "22%" : "15%"}
+        areaStyle={
+          splitProgress > 0.08
+            ? {
+                left: videoSide === "right" ? "50%" : 0,
+                right: videoSide === "left" ? "50%" : 0,
+                padding: "0 5%",
+              }
+            : undefined
+        }
       />
     </AbsoluteFill>
   );

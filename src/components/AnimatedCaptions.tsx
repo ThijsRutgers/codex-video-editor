@@ -15,6 +15,7 @@ interface AnimatedCaptionsProps {
   maxWordsPerPage?: number;
   fontSize?: number;
   bottom?: string;
+  areaStyle?: React.CSSProperties;
 }
 
 export const AnimatedCaptions: React.FC<AnimatedCaptionsProps> = ({
@@ -24,6 +25,7 @@ export const AnimatedCaptions: React.FC<AnimatedCaptionsProps> = ({
   maxWordsPerPage = 5,
   fontSize = 40,
   bottom = "15%",
+  areaStyle,
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
@@ -63,6 +65,7 @@ export const AnimatedCaptions: React.FC<AnimatedCaptionsProps> = ({
           display: "flex",
           justifyContent: "center",
           padding: "0 10%",
+          ...areaStyle,
         }}
       >
         <div

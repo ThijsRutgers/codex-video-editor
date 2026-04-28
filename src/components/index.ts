@@ -9,4 +9,12 @@ export { YearStamp } from "./YearStamp";
 export { LocationLabel } from "./LocationLabel";
 export { KeyFact } from "./KeyFact";
 export { QuoteCard } from "./QuoteCard";
+export {
+  KeepAwayChain,
+  MotivationMap,
+  ResponseReframe,
+  RewardLoop,
+  ScentBridge,
+  StimulationMeter,
+} from "./BehaviorGraphics";
 export type { CaptionWord } from "./AnimatedCaptions";

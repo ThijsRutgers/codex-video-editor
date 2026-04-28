@@ -36,7 +36,9 @@ If multiple paths are present, use the first valid local video path unless the u
 - Add intentional explanatory overlays for moments that need a name, timeline, count, contrast, map, process, or visual metaphor.
 - Prefer compact top-left/top-right cards when subtitles are active; avoid covering the speaker/action or lower subtitles.
 - Use varied documentary devices where useful: concept/name cards, year or count stamps, counters, timeline beats, process chains, quote cards, location labels, person cutouts, compare/versus labels, and simple diagrams.
-- Keep pacing restrained: for a 1-2 minute video, aim for about 4-8 strong visual explanation moments, spaced so the viewer can read them.
+- Keep pacing restrained and do not overdecorate the video. For a 1-2 minute video, prefer about 5 strong visual explanation moments unless the script clearly needs more; remove generic or redundant overlays even if the generator created them.
+- For larger explanatory animations, prefer a 50/50 split layout: crop/center the source video on one half, place the animation large on the other half, then transition smoothly back to full-screen video when the animation ends.
+- In split layout, avoid a flat black animation half. Use the current video as a dynamic background when possible: stretch/sync the video behind the graphic, apply heavy blur, darkening, and subtle saturation/vignette so the panel feels cinematic while remaining readable.
 - If the repo lacks a needed overlay component, add a small reusable component rather than forcing the wrong existing overlay type.
 5. Perform a custom Remotion animation pass when it would improve the edit:
 - Use Remotion as a motion graphics system, not only an overlay renderer.

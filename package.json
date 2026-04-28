@@ -1,8 +1,9 @@
 {
-  "name": "video-editor-studio",
+  "name": "fantasie-editor",
   "version": "1.0.0",
-  "description": "Autonomous AI video editor powered by Codex + Remotion",
+  "description": "Open-source Codex-native video editor powered by Remotion",
   "scripts": {
+    "doctor": "node scripts/doctor.mjs",
     "dev": "npx remotion studio",
     "review": "npm run dev",
     "prepare:review": "npm run transcribe && npm run storyboard:generate && npm run autolabel:people -- --force && npm run storyboard:budget && npm run enrich:people",

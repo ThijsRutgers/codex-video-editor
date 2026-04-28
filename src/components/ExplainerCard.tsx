@@ -13,6 +13,7 @@ interface ExplainerCardProps {
   title: string;
   detail: string;
   side?: "left" | "right";
+  layout?: "overlay" | "split";
   accentColor?: string;
 }
 
@@ -21,6 +22,7 @@ export const ExplainerCard: React.FC<ExplainerCardProps> = ({
   title,
   detail,
   side = "left",
+  layout = "overlay",
   accentColor = DOC_COLORS.accent,
 }) => {
   const frame = useCurrentFrame();
@@ -40,9 +42,15 @@ export const ExplainerCard: React.FC<ExplainerCardProps> = ({
 
   const translateX = interpolate(enter, [0, 1], [side === "left" ? -88 : 88, 0]);
   const opacityIn = interpolate(enter, [0, 1], [0, 1]);
+  const isSplit = layout === "split";
 
-  const positionStyle: React.CSSProperties =
-    side === "left" ? { left: 78, top: 82 } : { right: 78, top: 82 };
+  const positionStyle: React.CSSProperties = isSplit
+    ? side === "left"
+      ? { left: 0, top: 0, bottom: 0 }
+      : { right: 0, top: 0, bottom: 0 }
+    : side === "left"
+      ? { left: 78, top: 82 }
+      : { right: 78, top: 82 };
 
   return (
     <AbsoluteFill>
@@ -50,15 +58,23 @@ export const ExplainerCard: React.FC<ExplainerCardProps> = ({
         style={{
           position: "absolute",
           ...positionStyle,
-          width: 520,
-          maxWidth: "42%",
-          transform: `translateX(${translateX}px)`,
+          width: isSplit ? "50%" : 520,
+          maxWidth: isSplit ? "none" : "42%",
+          height: isSplit ? "100%" : undefined,
+          display: isSplit ? "flex" : undefined,
+          alignItems: isSplit ? "center" : undefined,
+          justifyContent: isSplit ? "center" : undefined,
+          padding: isSplit ? "58px 68px" : undefined,
+          boxSizing: "border-box",
+          transform: `translateX(${isSplit ? translateX * 0.45 : translateX}px)`,
           opacity: Math.min(opacityIn, opacityOut),
           pointerEvents: "none",
         }}
       >
         <div
           style={{
+            width: isSplit ? 690 : "100%",
+            maxWidth: "100%",
             display: "flex",
             alignItems: "stretch",
             gap: 14,
