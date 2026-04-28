@@ -1,15 +1,7 @@
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import path from "path";
 
-type OverlayType =
-  | "opening_title"
-  | "chapter_title"
-  | "year_stamp"
-  | "location_label"
-  | "key_fact"
-  | "quote_card"
-  | "person_label"
-  | "outro";
+type OverlayType = "year_stamp" | "person_label";
 
 type Overlay = {
   id: string;
@@ -62,21 +54,15 @@ const TRANSCRIPT_PATH = path.join(PROJECT_ROOT, "data", "transcript.json");
 const FACE_LIBRARY_PATH = path.join(PROJECT_ROOT, "data", "face-library.json");
 
 const EXCLUDE_NAMES = new Set([
-  "Operation Rising Lion",
   "United States",
   "Saudi Arabia",
   "United Arab Emirates",
   "Middle East",
-  "Abraham Accords",
-  "Oval Office",
   "Tehran",
   "Russia",
   "Turkey",
   "Iran",
   "Israel",
-  "Persia",
-  "Magog",
-  "Gog Magog",
 ]);
 
 const NAME_START_STOPWORDS = new Set([
@@ -428,14 +414,6 @@ const inferRole = (name: string, sentence: string): string => {
     return "Commentator";
   }
 
-  if (name === "Donald Trump") {
-    return "U.S. President";
-  }
-
-  if (name === "Greg Laurie") {
-    return "Pastor";
-  }
-
   return "Referenced Figure";
 };
 
@@ -488,7 +466,7 @@ const conflicts = (
   const end = start + duration;
 
   return overlays.some((overlay) => {
-    if (overlay.type !== "person_label" && overlay.type !== "location_label") {
+    if (overlay.type !== "person_label") {
       return false;
     }
 

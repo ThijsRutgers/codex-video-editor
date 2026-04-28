@@ -14,6 +14,7 @@
 import { execSync } from "child_process";
 import { existsSync, mkdirSync, writeFileSync } from "fs";
 import path from "path";
+import type { Language } from "@remotion/install-whisper-cpp";
 
 const PROJECT_ROOT = path.resolve(__dirname, "..");
 const VIDEO_PATH = path.join(PROJECT_ROOT, "public", "video.mp4");
@@ -21,7 +22,7 @@ const AUDIO_PATH = path.join(PROJECT_ROOT, "public", "audio.wav");
 const OUTPUT_PATH = path.join(PROJECT_ROOT, "data", "transcript.json");
 
 const WHISPER_MODEL = process.env.WHISPER_MODEL || "medium";
-const WHISPER_LANG = process.env.WHISPER_LANG || "auto";
+const WHISPER_LANG = (process.env.WHISPER_LANG || "auto") as Language;
 
 async function main() {
   console.log("🎤 Starting transcription pipeline...\n");

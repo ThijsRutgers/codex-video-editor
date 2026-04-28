@@ -46,6 +46,20 @@ That workflow means:
 - Ingest the video and run the mechanical prep flow.
 - Treat the generated storyboard as a scaffold, not the final edit.
 - Perform the AI director pass and custom Remotion animation pass.
+- Do not add or keep an opening video-title card. Do not add chapter or section
+  title cards. Remove generated title, chapter, section, or outro text unless
+  the user explicitly asks for it.
+- The setup flow is fixed; the creative edit is not. Animations must be chosen
+  from the transcript and sampled frames for the current video, not copied as a
+  standard sequence from the skill or from a previous project.
+- The reusable side rules are: keep subtitles unless asked otherwise; use 50/50
+  split scenes for explanatory animation, but not in the first 5-10 seconds; use
+  the non-video half as a full-height Remotion canvas; reserve compact cards for
+  factual years/dates and names; use person cutouts/images only when they fit.
+  The content of each animation must be invented for the current video.
+- For custom 50/50 animation, add a video-specific storyboard type, register it
+  in `CUSTOM_SPLIT_OVERLAY_TYPES`, and wire its render branch in
+  `src/compositions/MainComposition.tsx`.
 - Keep subtitles unless the user asks otherwise.
 - Validate with still frames.
 - Stop at review unless the user explicitly asks to render/export.

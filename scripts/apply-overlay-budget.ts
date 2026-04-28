@@ -1,19 +1,11 @@
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import path from "path";
 
-type OverlayType =
-  | "opening_title"
-  | "chapter_title"
-  | "year_stamp"
-  | "location_label"
-  | "key_fact"
-  | "quote_card"
-  | "person_label"
-  | "outro";
+type OverlayType = "year_stamp" | "person_label";
 
 type Overlay = {
   id: string;
-  type: OverlayType;
+  type: string;
   startTime: number;
   duration: number;
   content: Record<string, unknown>;
@@ -27,13 +19,11 @@ type Storyboard = {
 };
 
 type BudgetProfile = {
-  maxTextMoments: number;
   minSpacingSec: number;
   sameTypeCooldownSec: number;
-  maxSections: number;
+  maxFactualMoments: number;
+  maxYears: number;
   maxPersons: number;
-  maxInfo: number;
-  maxEmphasis: number;
 };
 
 const PROJECT_ROOT = path.resolve(__dirname, "..");
@@ -44,74 +34,49 @@ const profileForDuration = (durationSec: number): BudgetProfile => {
 
   if (minutes >= 15) {
     return {
-      maxTextMoments: 22,
       minSpacingSec: 24,
       sameTypeCooldownSec: 70,
-      maxSections: 4,
+      maxFactualMoments: 15,
+      maxYears: 10,
       maxPersons: 5,
-      maxInfo: 10,
-      maxEmphasis: 3,
     };
   }
 
   if (minutes >= 10) {
     return {
-      maxTextMoments: 16,
       minSpacingSec: 34,
       sameTypeCooldownSec: 70,
-      maxSections: 4,
+      maxFactualMoments: 10,
+      maxYears: 7,
       maxPersons: 3,
-      maxInfo: 7,
-      maxEmphasis: 2,
     };
   }
 
   if (minutes >= 5) {
     return {
-      maxTextMoments: 12,
       minSpacingSec: 24,
       sameTypeCooldownSec: 50,
-      maxSections: 3,
+      maxFactualMoments: 7,
+      maxYears: 5,
       maxPersons: 2,
-      maxInfo: 5,
-      maxEmphasis: 1,
     };
   }
 
   return {
-    maxTextMoments: 6,
     minSpacingSec: 14,
     sameTypeCooldownSec: 25,
-    maxSections: 2,
+    maxFactualMoments: 4,
+    maxYears: 3,
     maxPersons: 2,
-    maxInfo: 3,
-    maxEmphasis: 1,
   };
 };
 
-const classify = (
-  overlay: Overlay
-): "fixed" | "section" | "person" | "info" | "emphasis" | "other" => {
-  if (overlay.type === "opening_title" || overlay.type === "outro") {
-    return "fixed";
-  }
-  if (overlay.type === "chapter_title") {
-    return "section";
-  }
-  if (overlay.type === "person_label") {
-    return "person";
-  }
-  if (overlay.type === "quote_card") {
-    return "emphasis";
-  }
-  if (
-    overlay.type === "year_stamp" ||
-    overlay.type === "location_label" ||
-    overlay.type === "key_fact"
-  ) {
-    return "info";
-  }
-  return "other";
+const isBudgetedOverlay = (overlay: Overlay): overlay is Overlay & { type: OverlayType } => {
+  return overlay.type === "year_stamp" || overlay.type === "person_label";
+};
+
+const classify = (overlay: Overlay & { type: OverlayType }): "year" | "person" => {
+  return overlay.type === "person_label" ? "person" : "year";
 };
 
 const overlaps = (a: Overlay, b: Overlay): boolean => {
@@ -130,23 +95,19 @@ const main = () => {
   const duration = Number(storyboard.duration ?? 0);
   const profile = profileForDuration(duration);
 
-  const fixed = overlays.filter((overlay) => classify(overlay) === "fixed");
   const candidates = overlays
-    .filter((overlay) => classify(overlay) !== "fixed")
-    .map((overlay) => {
-      const bucket = classify(overlay);
-      const minDuration = bucket === "info" || bucket === "emphasis" ? 2.5 : 1.8;
-      return {
-        ...overlay,
-        duration: Math.max(minDuration, overlay.duration),
-      };
-    });
+    .filter(isBudgetedOverlay)
+    .map((overlay) => ({
+      ...overlay,
+      duration: Math.max(overlay.type === "person_label" ? 3.2 : 2.5, overlay.duration),
+    }));
+  const droppedNonFactual = overlays.length - candidates.length;
 
-  const selected: Overlay[] = [];
+  const selected: Array<Overlay & { type: OverlayType }> = [];
   const lastTypeStart = new Map<OverlayType, number>();
-  const counts = { section: 0, person: 0, info: 0, emphasis: 0 };
+  const counts = { year: 0, person: 0 };
 
-  const canPlace = (overlay: Overlay, spacingSec: number): boolean => {
+  const canPlace = (overlay: Overlay & { type: OverlayType }, spacingSec: number): boolean => {
     if (selected.some((existing) => Math.abs(existing.startTime - overlay.startTime) < spacingSec)) {
       return false;
     }
@@ -163,28 +124,20 @@ const main = () => {
       return false;
     }
 
-    if (fixed.some((existing) => overlaps(existing, overlay))) {
-      return false;
-    }
-
     return true;
   };
 
-  const place = (overlay: Overlay, bucket: "section" | "person" | "info" | "emphasis") => {
+  const place = (overlay: Overlay & { type: OverlayType }, bucket: "year" | "person") => {
     selected.push(overlay);
     selected.sort((a, b) => a.startTime - b.startTime);
     lastTypeStart.set(overlay.type, overlay.startTime);
     counts[bucket] += 1;
   };
 
-  const pickBucket = (
-    bucket: "section" | "person" | "info" | "emphasis",
-    limit: number,
-    spacingSec: number
-  ) => {
+  const pickBucket = (bucket: "year" | "person", limit: number, spacingSec: number) => {
     const bucketOverlays = candidates.filter((overlay) => classify(overlay) === bucket);
     for (const overlay of bucketOverlays) {
-      if (counts[bucket] >= limit || selected.length >= profile.maxTextMoments) {
+      if (counts[bucket] >= limit || selected.length >= profile.maxFactualMoments) {
         return;
       }
 
@@ -194,38 +147,26 @@ const main = () => {
     }
   };
 
-  const sectionSpacing = Math.max(profile.minSpacingSec, Math.min(170, duration / 9));
   const personSpacing = Math.max(profile.minSpacingSec + 12, 54);
 
-  pickBucket("section", profile.maxSections, sectionSpacing);
   pickBucket("person", profile.maxPersons, personSpacing);
-  pickBucket("emphasis", profile.maxEmphasis, profile.minSpacingSec);
-  pickBucket("info", profile.maxInfo, profile.minSpacingSec);
+  pickBucket("year", profile.maxYears, profile.minSpacingSec);
 
   for (const overlay of candidates) {
-    if (selected.length >= profile.maxTextMoments) {
+    if (selected.length >= profile.maxFactualMoments) {
       break;
     }
 
     const bucket = classify(overlay);
-    if (bucket === "other") {
-      continue;
-    }
 
     if (selected.some((s) => s.id === overlay.id)) {
       continue;
     }
 
-    if (bucket === "section" && counts.section >= profile.maxSections) {
-      continue;
-    }
     if (bucket === "person" && counts.person >= profile.maxPersons) {
       continue;
     }
-    if (bucket === "info" && counts.info >= profile.maxInfo) {
-      continue;
-    }
-    if (bucket === "emphasis" && counts.emphasis >= profile.maxEmphasis) {
+    if (bucket === "year" && counts.year >= profile.maxYears) {
       continue;
     }
 
@@ -234,17 +175,16 @@ const main = () => {
     }
   }
 
-  const nextOverlays = [...fixed, ...selected].sort((a, b) => a.startTime - b.startTime);
+  const nextOverlays = [...selected].sort((a, b) => a.startTime - b.startTime);
   storyboard.overlays = nextOverlays;
   (storyboard as Record<string, unknown>).editorialBudget = {
     appliedAt: new Date().toISOString(),
     profile,
     kept: {
-      totalTextMoments: selected.length,
-      sections: counts.section,
+      factualMoments: selected.length,
+      years: counts.year,
       people: counts.person,
-      info: counts.info,
-      emphasis: counts.emphasis,
+      droppedNonFactual,
     },
   };
 
@@ -253,8 +193,11 @@ const main = () => {
     [
       `Applied overlay budget profile for ${(duration / 60).toFixed(1)} min video.`,
       `Overlays: ${overlays.length} -> ${nextOverlays.length}`,
-      `Kept moments: section=${counts.section}, person=${counts.person}, info=${counts.info}, emphasis=${counts.emphasis}`,
-    ].join("\n")
+      `Kept moments: year=${counts.year}, person=${counts.person}`,
+      droppedNonFactual > 0 ? `Dropped non-factual prep overlays: ${droppedNonFactual}` : "",
+    ]
+      .filter(Boolean)
+      .join("\n")
   );
 };
 

@@ -1,10 +1,12 @@
 import { getVideoMetadata } from "@remotion/media-utils";
 import { Composition, staticFile, type CalculateMetadataFunction } from "remotion";
+import storyboardData from "../data/storyboard.json";
 import { MainComposition } from "./compositions/MainComposition";
 
-const calculateMetadata: CalculateMetadataFunction<Record<string, never>> = async () => {
+const calculateMetadata: CalculateMetadataFunction<Record<string, unknown>> = async () => {
   const metadata = await getVideoMetadata(staticFile("video.mp4"));
-  const fps = metadata.fps && Number.isFinite(metadata.fps) ? metadata.fps : 30;
+  const storyboardFps = Number(storyboardData.fps);
+  const fps = Number.isFinite(storyboardFps) && storyboardFps > 0 ? storyboardFps : 30;
   const durationInFrames = Math.ceil(metadata.durationInSeconds * fps);
 
   return {

@@ -5,15 +5,7 @@ import path from "path";
 import https from "https";
 import { spawnSync } from "child_process";
 
-type OverlayType =
-  | "opening_title"
-  | "chapter_title"
-  | "year_stamp"
-  | "location_label"
-  | "key_fact"
-  | "quote_card"
-  | "person_label"
-  | "outro";
+type OverlayType = "year_stamp" | "person_label";
 
 type StoryboardOverlay = {
   id: string;
@@ -78,7 +70,7 @@ const parseArgs = (): { names: string[]; force: boolean } => {
     }
 
     if (arg === "--help") {
-      console.log("Usage: npx tsx scripts/enrich-person-overlays.ts [--name \"Donald Trump\"] [--force]");
+      console.log("Usage: npx tsx scripts/enrich-person-overlays.ts [--name \"Person Name\"] [--force]");
       process.exit(0);
     }
   }
@@ -331,27 +323,11 @@ const requestJson = (apiPath: string, apiKey: string): Promise<SearchResponse> =
 };
 
 const chooseImageUrls = async (name: string, apiKey: string): Promise<string[]> => {
-  const fallbackKnownUrls: Record<string, string[]> = {
-    "harold camping": [
-      "https://upload.wikimedia.org/wikipedia/en/4/4a/Harold_Camping_new.jpg",
-    ],
-    "edgar whisenant": [
-      "https://www.christianpost.com/files/original/thumbnail/03/31/33119.jpg",
-    ],
-    "amihai eliyahu": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Amichai_Eliyahu.jpg/250px-Amichai_Eliyahu.jpg",
-    ],
-    ezekiel: [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Ezekiel%27s_Vision.jpg/640px-Ezekiel%27s_Vision.jpg",
-    ],
-  };
-
   const queryVariants = [
     `${name} official portrait`,
     `${name}`,
     `${name} photo`,
     `${name} portrait`,
-    `President ${name}`,
   ];
 
   for (const query of queryVariants) {
@@ -394,7 +370,7 @@ const chooseImageUrls = async (name: string, apiKey: string): Promise<string[]> 
     }
   }
 
-  return fallbackKnownUrls[name.toLowerCase()] ?? [];
+  return [];
 };
 
 const fileExtFromResponse = (contentType: string | undefined, fallbackUrl: string): string => {

@@ -9,24 +9,10 @@ import {
   useVideoConfig,
 } from "remotion";
 import { loadFont as loadInterFont } from "@remotion/google-fonts/Inter";
-import { loadFont as loadPlayfairFont } from "@remotion/google-fonts/PlayfairDisplay";
 import { loadFont as loadJetBrainsMonoFont } from "@remotion/google-fonts/JetBrainsMono";
 import {
   AnimatedCaptions,
-  ExplainerCard,
-  KeyFact,
-  KeepAwayChain,
-  LocationLabel,
-  LogoOutro,
-  MotivationMap,
-  OpeningTitle,
   PersonLabel,
-  QuoteCard,
-  ResponseReframe,
-  RewardLoop,
-  ScentBridge,
-  SectionTitle,
-  StimulationMeter,
   YearStamp,
   type CaptionWord,
 } from "../components";
@@ -34,30 +20,11 @@ import storyboardData from "../../data/storyboard.json";
 import transcriptData from "../../data/transcript.json";
 
 loadInterFont("normal", { weights: ["500", "600", "700"], subsets: ["latin"] });
-loadPlayfairFont("normal", { weights: ["700"], subsets: ["latin"] });
-loadPlayfairFont("italic", { weights: ["500"], subsets: ["latin"] });
 loadJetBrainsMonoFont("normal", { weights: ["700"], subsets: ["latin"] });
-
-type OverlayType =
-  | "opening_title"
-  | "chapter_title"
-  | "year_stamp"
-  | "location_label"
-  | "key_fact"
-  | "quote_card"
-  | "explainer_card"
-  | "person_label"
-  | "outro"
-  | "motivation_map"
-  | "scent_bridge"
-  | "reward_loop"
-  | "stimulation_meter"
-  | "keepaway_chain"
-  | "response_reframe";
 
 type StoryboardOverlay = {
   id: string;
-  type: OverlayType;
+  type: string;
   startTime: number;
   duration: number;
   content: Record<string, unknown>;
@@ -69,6 +36,7 @@ const toFrame = (seconds: number, fps: number): number => {
 
 const SPLIT_TRANSITION_FRAMES = 18;
 const SPLIT_BACKDROP_BLUR = 34;
+const CUSTOM_SPLIT_OVERLAY_TYPES = new Set<string>();
 
 const cleanCaptions = (words: CaptionWord[]): CaptionWord[] => {
   return words
@@ -94,44 +62,13 @@ const cleanCaptions = (words: CaptionWord[]): CaptionWord[] => {
     });
 };
 
-const asStringList = (value: unknown, fallback: string[]): string[] => {
-  if (!Array.isArray(value)) {
-    return fallback;
-  }
-
-  const result = value.map((item) => String(item)).filter(Boolean);
-  return result.length > 0 ? result : fallback;
-};
-
-const asMeters = (
-  value: unknown,
-  fallback: Array<{ label: string; value: number }>
-): Array<{ label: string; value: number }> => {
-  if (!Array.isArray(value)) {
-    return fallback;
-  }
-
-  const result = value
-    .map((item) => {
-      if (!item || typeof item !== "object") {
-        return null;
-      }
-
-      const record = item as Record<string, unknown>;
-      return {
-        label: String(record.label ?? ""),
-        value: Number(record.value ?? 0),
-      };
-    })
-    .filter((item): item is { label: string; value: number } => {
-      return !!item && !!item.label && Number.isFinite(item.value);
-    });
-
-  return result.length > 0 ? result : fallback;
-};
-
 const isSplitOverlay = (overlay: StoryboardOverlay): boolean => {
-  return overlay.content.layout === "split";
+  return (
+    overlay.content.layout === "split" &&
+    overlay.type !== "year_stamp" &&
+    overlay.type !== "person_label" &&
+    CUSTOM_SPLIT_OVERLAY_TYPES.has(overlay.type)
+  );
 };
 
 const getGraphicSide = (overlay: StoryboardOverlay): "left" | "right" => {
@@ -193,7 +130,7 @@ export const MainComposition: React.FC = () => {
 
   const isLowerThirdBusy = useMemo(() => {
     return overlays.some((overlay) => {
-      if (overlay.type !== "location_label" && overlay.type !== "person_label") {
+      if (overlay.type !== "person_label") {
         return false;
       }
 
@@ -302,58 +239,10 @@ export const MainComposition: React.FC = () => {
 
         return (
           <Sequence key={overlay.id} from={from} durationInFrames={durationInFrames}>
-            {overlay.type === "opening_title" ? (
-              <OpeningTitle
-                title={String(overlay.content.title ?? "")}
-                subtitle={String(overlay.content.subtitle ?? "") || undefined}
-              />
-            ) : null}
-
-            {overlay.type === "chapter_title" ? (
-              <SectionTitle title={String(overlay.content.title ?? "")} />
-            ) : null}
-
             {overlay.type === "year_stamp" ? (
               <YearStamp
                 year={String(overlay.content.year ?? "")}
                 detail={String(overlay.content.detail ?? "") || undefined}
-              />
-            ) : null}
-
-            {overlay.type === "location_label" ? (
-              <LocationLabel
-                location={String(overlay.content.location ?? "")}
-                qualifier={String(overlay.content.qualifier ?? "") || undefined}
-              />
-            ) : null}
-
-            {overlay.type === "key_fact" ? (
-              <KeyFact
-                value={String(overlay.content.value ?? "")}
-                context={String(overlay.content.context ?? "")}
-              />
-            ) : null}
-
-            {overlay.type === "quote_card" ? (
-              <QuoteCard
-                quote={String(overlay.content.quote ?? "")}
-                attribution={String(overlay.content.attribution ?? "")}
-                year={String(overlay.content.year ?? "") || undefined}
-              />
-            ) : null}
-
-            {overlay.type === "explainer_card" ? (
-              <ExplainerCard
-                eyebrow={String(overlay.content.eyebrow ?? "Name")}
-                title={String(overlay.content.title ?? "")}
-                detail={String(overlay.content.detail ?? "")}
-                side={overlay.content.side === "right" ? "right" : "left"}
-                layout={overlay.content.layout === "split" ? "split" : "overlay"}
-                accentColor={
-                  overlay.content.accentColor
-                    ? String(overlay.content.accentColor)
-                    : undefined
-                }
               />
             ) : null}
 
@@ -369,101 +258,6 @@ export const MainComposition: React.FC = () => {
               />
             ) : null}
 
-            {overlay.type === "outro" ? (
-              <LogoOutro
-                logoSrc={overlay.content.hasLogo ? "assets/logo.png" : undefined}
-                websiteUrl={
-                  overlay.content.websiteUrl
-                    ? String(overlay.content.websiteUrl)
-                    : undefined
-                }
-              />
-            ) : null}
-
-            {overlay.type === "motivation_map" ? (
-              <MotivationMap
-                center={String(overlay.content.center ?? "Not spite")}
-                items={asStringList(overlay.content.items, [
-                  "Instinct",
-                  "Attention",
-                  "Bonding",
-                ])}
-                side={overlay.content.side === "left" ? "left" : "right"}
-                layout={overlay.content.layout === "split" ? "split" : "overlay"}
-                accentColor={String(overlay.content.accentColor ?? "#F97316")}
-                durationFrames={durationInFrames}
-              />
-            ) : null}
-
-            {overlay.type === "scent_bridge" ? (
-              <ScentBridge
-                source={String(overlay.content.source ?? "Your item")}
-                target={String(overlay.content.target ?? "Comfort")}
-                detail={String(overlay.content.detail ?? "Familiar smell becomes a cue.")}
-                side={overlay.content.side === "right" ? "right" : "left"}
-                layout={overlay.content.layout === "split" ? "split" : "overlay"}
-                accentColor={String(overlay.content.accentColor ?? "#7DD3FC")}
-                durationFrames={durationInFrames}
-              />
-            ) : null}
-
-            {overlay.type === "reward_loop" ? (
-              <RewardLoop
-                steps={asStringList(overlay.content.steps, [
-                  "Grab",
-                  "You react",
-                  "Reward",
-                ])}
-                detail={String(overlay.content.detail ?? "The chase can train the pattern.")}
-                side={overlay.content.side === "right" ? "right" : "left"}
-                layout={overlay.content.layout === "split" ? "split" : "overlay"}
-                accentColor={String(overlay.content.accentColor ?? "#F472B6")}
-                durationFrames={durationInFrames}
-              />
-            ) : null}
-
-            {overlay.type === "stimulation_meter" ? (
-              <StimulationMeter
-                meters={asMeters(overlay.content.meters, [
-                  { label: "Mental work", value: 32 },
-                  { label: "Physical play", value: 38 },
-                ])}
-                detail={String(overlay.content.detail ?? "Belongings become the game.")}
-                side={overlay.content.side === "left" ? "left" : "right"}
-                layout={overlay.content.layout === "split" ? "split" : "overlay"}
-                accentColor={String(overlay.content.accentColor ?? "#86EFAC")}
-                durationFrames={durationInFrames}
-              />
-            ) : null}
-
-            {overlay.type === "keepaway_chain" ? (
-              <KeepAwayChain
-                steps={asStringList(overlay.content.steps, [
-                  "Take object",
-                  "Run off",
-                  "Invite play",
-                ])}
-                side={overlay.content.side === "right" ? "right" : "left"}
-                layout={overlay.content.layout === "split" ? "split" : "overlay"}
-                accentColor={String(overlay.content.accentColor ?? "#A78BFA")}
-                durationFrames={durationInFrames}
-              />
-            ) : null}
-
-            {overlay.type === "response_reframe" ? (
-              <ResponseReframe
-                bad={String(overlay.content.bad ?? "disobedience")}
-                good={String(overlay.content.good ?? "communication")}
-                detail={String(
-                  overlay.content.detail ??
-                    "Respond to the need instead of only the stolen object."
-                )}
-                side={overlay.content.side === "left" ? "left" : "right"}
-                layout={overlay.content.layout === "split" ? "split" : "overlay"}
-                accentColor={String(overlay.content.accentColor ?? "#D4A853")}
-                durationFrames={durationInFrames}
-              />
-            ) : null}
           </Sequence>
         );
       })}
